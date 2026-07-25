@@ -144,6 +144,7 @@ html,body{
   width:100%;
   perspective:1400px;
   overflow:hidden;
+  touch-action: pan-y; 
 }
 
 .carousel-ring{

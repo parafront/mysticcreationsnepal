@@ -210,6 +210,45 @@ function initRingGallery(sceneId, ringId, prevId, nextId) {
   if (prevBtn) prevBtn.addEventListener('click', () => rotate(-1));
   if (nextBtn) nextBtn.addEventListener('click', () => rotate(1));
 
+  /* ---------- Touch swipe support ---------- */
+  let touchStartX = 0;
+  let touchStartY = 0;
+  let touchDeltaX = 0;
+  let isSwiping = false;
+
+  scene.addEventListener('touchstart', (e) => {
+    touchStartX = e.touches[0].clientX;
+    touchStartY = e.touches[0].clientY;
+    touchDeltaX = 0;
+    isSwiping = true;
+  }, { passive: true });
+
+  scene.addEventListener('touchmove', (e) => {
+    if (!isSwiping) return;
+    const touchX = e.touches[0].clientX;
+    const touchY = e.touches[0].clientY;
+    touchDeltaX = touchX - touchStartX;
+    const deltaY = touchY - touchStartY;
+
+    // Only hijack the gesture (block page scroll) once it's clearly horizontal
+    if (Math.abs(touchDeltaX) > Math.abs(deltaY)) {
+      e.preventDefault();
+    }
+  }, { passive: false });
+
+  scene.addEventListener('touchend', () => {
+    if (!isSwiping) return;
+    isSwiping = false;
+
+    const SWIPE_THRESHOLD = 40; // px — minimum drag distance to count as a swipe
+    if (touchDeltaX > SWIPE_THRESHOLD) {
+      rotate(-1);       // swiped right -> go to previous photo
+    } else if (touchDeltaX < -SWIPE_THRESHOLD) {
+      rotate(1);        // swiped left -> go to next photo
+    }
+    touchDeltaX = 0;
+    });
+
   let resizeTimeout;
   window.addEventListener('resize', () => {
     clearTimeout(resizeTimeout);
